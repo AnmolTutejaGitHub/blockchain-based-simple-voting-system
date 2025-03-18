@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.19;
+import {AutomationCompatibleInterface} from "../lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol";
 
 /**
  * @title Simple Voting System Smart Contract
@@ -9,7 +10,7 @@ pragma solidity ^0.8.19;
  * @dev --ignore
  */
 
-contract Voting {
+contract Voting is AutomationCompatibleInterface {
 
     error Voting__roomIdDoesNotExist();
     error Voting__candidateRegisterationTimeOut();
@@ -144,5 +145,28 @@ contract Voting {
             if(s_rooms[roomId].voteCount[room.candidates[i]] == maxVotes) room.winners.push(room.candidates[i]);
         }
         emit WinnerPicked(roomId,room.winners);
+    }
+
+
+    function checkUpkeep( bytes calldata /* checkData */) public view override returns (bool upkeepNeeded, bytes memory performData) {
+    upkeepNeeded = false;
+    uint256 roomIdToDeclare;
+
+    for (uint256 i = 1 ;i< = s_roomCount; i++) {
+        if (block.timestamp > s_rooms[i].votingEndTime && s_rooms[i].winners.length == 0) {
+            upkeepNeeded = true;
+            roomIdToDeclare = i;
+            break;
+        }
+    }
+    performData = abi.encode(roomIdToDeclare);
+}
+
+    function performUpkeep(bytes calldata performData) external override {
+        uint256 roomId = abi.decode(performData, (uint256));
+
+        if (s_roomCount >= roomId && s_rooms[roomId].winners.length == 0) {
+        declareResult(roomId);
+        }
     }
 }

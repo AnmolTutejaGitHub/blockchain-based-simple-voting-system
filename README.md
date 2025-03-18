@@ -7,8 +7,8 @@ uint256 votingStartTime;
 uint256 votingEndTime;
 ```
 
-The system also handles result declaration.
+The system also handles result declaration. 
+</br>
 
-⚡️ **Upcoming Feature:**
-- Chainlink automation will be implemented soon to automate result declaration.
+uses chainlink automation for result declaration.
 
