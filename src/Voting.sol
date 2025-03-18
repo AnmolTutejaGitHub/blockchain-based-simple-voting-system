@@ -152,7 +152,7 @@ contract Voting is AutomationCompatibleInterface {
     upkeepNeeded = false;
     uint256 roomIdToDeclare;
 
-    for (uint256 i = 1 ;i< = s_roomCount; i++) {
+    for (uint256 i = 1 ;i<= s_roomCount; i++) {
         if (block.timestamp > s_rooms[i].votingEndTime && s_rooms[i].winners.length == 0) {
             upkeepNeeded = true;
             roomIdToDeclare = i;
