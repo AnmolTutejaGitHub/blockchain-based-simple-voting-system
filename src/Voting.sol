@@ -18,6 +18,10 @@ contract Voting {
     error Voting__CanOnlyVoteOnce();
     error Voting__votingHasNotEnded();
     error Voting__CandidateAlreadyRegistered();
+    error Voting__CantStartVotingBeforeRegistationWindowEnd();
+    error Voting__VotingEndTimeCanNotBeLessThanStartTime();
+    error Voting__NooneRegisteredAsCandidate();
+
 
      event WinnerPicked(uint256 indexed roomId, address[] indexed winner);
 
@@ -48,6 +52,16 @@ contract Voting {
     }
 
     function createRoom(uint256 candidateRegisterationWindow,uint256 votingStartTime,uint256 votingEndTime) public returns (uint256) {
+    
+        if(votingStartTime < block.timestamp + candidateRegisterationWindow + 1){
+            revert Voting__CantStartVotingBeforeRegistationWindowEnd();
+        }
+
+        if(votingEndTime <= votingStartTime){
+            revert Voting__VotingEndTimeCanNotBeLessThanStartTime();
+        }
+
+
         s_roomCount++;
         uint256 newRoomId = s_roomCount;
 
@@ -101,7 +115,7 @@ contract Voting {
     }
 
 
-    function max(uint256 a, uint256 b) internal pure returns (uint256) {
+    function max(uint256 a, uint256 b) public pure returns (uint256) {
         return a > b ? a : b;
     }
 
@@ -112,6 +126,10 @@ contract Voting {
 
         if(block.timestamp <= s_rooms[roomId].votingEndTime){
             revert Voting__votingHasNotEnded();
+        }
+
+        if(s_rooms[roomId].candidates.length == 0){
+            revert Voting__NooneRegisteredAsCandidate();
         }
 
         uint256 length = s_rooms[roomId].candidates.length;
